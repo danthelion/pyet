@@ -1,16 +1,16 @@
-#pyet
+# pyet
 
 A simple MacOS menubar application for your spotify lyrics needs.
 
 Developed and tested on `python3.6`.
 
-##Dependencies
+## Dependencies
 ```bash
 bs4
 pyobjc
 ```
 
-##Install
+## Install
 
 ```bash
 pip install pyet
@@ -24,7 +24,7 @@ source pyet_venv/bin/activate
 python setup.py install
 ```
 
-##Run
+## Run
 ```bash
 pyet.py &
 ```
