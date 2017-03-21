@@ -4,6 +4,12 @@ A simple MacOS menubar application for your spotify lyrics needs.
 
 Developed and tested on `python3.6`.
 
+## Sample
+Idle
+![closed](closed.png)
+Active
+![open](open.png)
+
 ## Dependencies
 ```bash
 bs4
