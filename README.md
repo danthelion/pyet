@@ -13,10 +13,6 @@ pyobjc
 ## Install
 
 ```bash
-pip install pyet
-```
-or
-```bash
 git clone https://github.com/danthelion/pyet 
 cd pyet
 virtualenv pyet_venv
