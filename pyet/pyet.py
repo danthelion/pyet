@@ -1,13 +1,14 @@
 import re
-from subprocess import Popen, PIPE
 import urllib.request
+
+from subprocess import Popen, PIPE
 
 from AppKit import NSApplication, NSStatusBar, NSMenu, NSMenuItem, NSTimer, NSRunLoop, NSEventTrackingRunLoopMode
 from PyObjCTools import AppHelper
 from bs4 import BeautifulSoup
 
 
-class Poet(NSApplication):
+class Pyet(NSApplication):
     def finishLaunching(self):
         # Get current track info
         curr_track = get_current_track()
@@ -161,7 +162,7 @@ def get_lyrics(artist: str, song_title: str) -> str:
 
 
 def main():
-    app = Poet.sharedApplication()
+    app = Pyet.sharedApplication()
     AppHelper.runEventLoop()
 
 
