@@ -160,8 +160,6 @@ def get_lyrics(artist: str, song_title: str) -> str:
         artist = artist[3:]
     url = "https://lyrics.az/" + artist + "/-/" + song_title + ".html"
 
-    logger.debug(url)
-
     user_agent_collection = [
         'Mozilla/5.0 (Windows; U; Windows NT 5.1; it; rv:1.8.1.11) Gecko/20071127 Firefox/2.0.0.11',
         'Opera/9.25 (Windows NT 5.1; U; en)',
@@ -190,7 +188,6 @@ def get_lyrics(artist: str, song_title: str) -> str:
         return lyrics
 
     except Exception as e:
-        logger.debug(e)
         return 'Unable to find lyrics on lyrics.az \U0001F614'
 
 

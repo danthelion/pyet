@@ -20,17 +20,17 @@ bs4
 pyobjc
 ```
 
-## Install
+## Build
 
 ```bash
 git clone https://github.com/danthelion/pyet 
 cd pyet
-virtualenv pyet_venv
+virtualenv -p python3 pyet_venv
 source pyet_venv/bin/activate
-python setup.py install
+python setup.py py2app
 ```
 
 ## Run
 ```bash
-pyet.py &
+./dist/pyet.app/Contents/MacOS/pyet &
 ```
