@@ -25,6 +25,8 @@ class Pyet(NSApplication):
 
         # Remove empty lines
         self.lyrics = [x for x in self.lyrics if x]
+
+        # Cache current track to avoid unnecessary requests
         self.curr_track_hash = abs(hash(curr_track['curr_track_full'])) % (10 ** 8)
 
         # Create the status & menu bar
@@ -54,8 +56,9 @@ class Pyet(NSApplication):
         self.statusItem.setMenu_(self.menuBar)
 
         # Create our timer for song title updates
-        self.timer = NSTimer.scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(1, self, 'update:', '',
-                                                                                              True)
+        self.timer = NSTimer.scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(
+            1, self, 'update:', '', True
+        )
 
         # Add our timer to the runloop
         NSRunLoop.currentRunLoop().addTimer_forMode_(self.timer, NSEventTrackingRunLoopMode)
@@ -99,9 +102,14 @@ class Pyet(NSApplication):
             self.statusItem.setMenu_(self.menuBar)
 
     def doNothing_(self, sender):
-        # hack to enable menuItems by passing them this method as action
-        # setEnabled_ isn't working, so this should do for now (achieves
-        # the same thing)
+        """
+        Hack to enable menuItems by passing them this method as action
+        setEnabled_ isn't working, so this should do for now (achieves
+        the same thing)
+
+        :param sender:
+        :return:
+        """
         pass
 
 
