@@ -1,14 +1,22 @@
+import logging
+import random
 import re
-import urllib.request
-
 from subprocess import Popen, PIPE
+from urllib.request import Request, urlopen
 
 from AppKit import NSApplication, NSStatusBar, NSMenu, NSMenuItem, NSTimer, NSRunLoop, NSEventTrackingRunLoopMode
 from PyObjCTools import AppHelper
 from bs4 import BeautifulSoup
 
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
 
 class Pyet(NSApplication):
+    """
+    Class representing the base of the application.
+    """
+
     def finishLaunching(self):
         # Get current track info
         curr_track = get_current_track()
@@ -115,19 +123,19 @@ def get_current_track() -> dict:
     stdout, stderr = p.communicate(as_get_curr_song.encode())
 
     curr_track_full = stdout.decode().rstrip()
-    curr_artist = curr_track_full.split(' - ')[0]
-    curr_song = curr_track_full.split(' - ')[1]
 
-    return {
+    song_metadata = {
         'curr_track_full': curr_track_full,
-        'curr_artist': curr_artist,
-        'curr_song': curr_song
+        'curr_artist': curr_track_full.split(' - ')[0],
+        'curr_song': curr_track_full.split(' - ')[1]
     }
+
+    return song_metadata
 
 
 def get_lyrics(artist: str, song_title: str) -> str:
     """
-    Scrape the lyrics from azlyrics.com
+    Scrape the lyrics from lyrics.az
 
     :param artist: Artist name in the original format from Spotify.
     :param song_title: Song title in the original format from Spotify.
@@ -137,28 +145,45 @@ def get_lyrics(artist: str, song_title: str) -> str:
     song_title = song_title.lower()
 
     # remove all except alphanumeric characters from artist and song_title
-    artist = re.sub('[^A-Za-z0-9]+', "", artist)
-    song_title = re.sub('[^A-Za-z0-9]+', "", song_title)
+    artist = re.sub('[^\w]+', "-", artist)
+    song_title = re.sub('[^\w]+', "-", song_title)
 
     if artist.startswith("the"):  # remove starting 'the' from artist e.g. the who -> who
         artist = artist[3:]
-    url = "http://azlyrics.com/lyrics/" + artist + "/" + song_title + ".html"
+    url = "https://lyrics.az/" + artist + "/-/" + song_title + ".html"
+
+    logger.debug(url)
+
+    user_agent_collection = [
+        'Mozilla/5.0 (Windows; U; Windows NT 5.1; it; rv:1.8.1.11) Gecko/20071127 Firefox/2.0.0.11',
+        'Opera/9.25 (Windows NT 5.1; U; en)',
+        'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)',
+        'Mozilla/5.0 (compatible; Konqueror/3.5; Linux) KHTML/3.5.5 (like Gecko) (Kubuntu)',
+        'Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.142 Safari/535.19',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) Gecko/20100101 Firefox/11.0',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.6; rv:8.0.1) Gecko/20100101 Firefox/8.0.1',
+        'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.151 Safari/535.19'
+    ]
+    user_agent = {
+        'User-agent': random.choice(user_agent_collection)
+    }
 
     try:
-        content = urllib.request.urlopen(url).read()
-        soup = BeautifulSoup(content, 'html.parser').prettify(formatter=None)
+        req = Request(url, headers=user_agent)
+        content = urlopen(req)
+        soup = BeautifulSoup(content, 'html.parser')
+        soup = soup.find_all("p", class_="lyric-text")[0]
         lyrics = str(soup)
 
-        # lyrics lies between up_partition and down_partition
-        up_partition = '<!-- Usage of azlyrics.com content by any third-party lyrics provider is prohibited by our licensing agreement. Sorry about that. -->'
-        down_partition = '<!-- MxM banner -->'
-        lyrics = lyrics.split(up_partition)[1]
-        lyrics = lyrics.split(down_partition)[0]
-        lyrics = lyrics.replace('</br>', '').replace('</div>', '').strip()
+        if 'nobody has submitted' in lyrics:
+            raise ValueError('Missing lyrics')
+
+        lyrics = lyrics.replace('<br/>', '<br>').replace('</div>', '').strip()
         return lyrics
 
-    except:
-        return 'Lyrics not found. :('
+    except Exception as e:
+        logger.debug(e)
+        return 'Unable to find lyrics on lyrics.az \U0001F614'
 
 
 def main():
